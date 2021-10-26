@@ -1,0 +1,44 @@
+Vagrant.configure("2") do |config|
+  
+  servers=[
+    {
+      :hostname => "CentosVM",
+      :box => "centos/7",
+      :ip => "192.168.10.11",
+      :ssh_port => '2200' 
+    },
+    {
+      :hostname => "UbuntuVM",
+      :box => "bento/ubuntu-20.04",
+      :ip => "192.168.11.11",
+      :ssh_port => '2222'
+    }
+  ]
+
+  servers.each do |machine|
+    config.vm.define machine[:hostname] do |node|
+            node.vm.box = machine[:box]
+            node.vm.hostname = machine[:hostname]
+            node.vm.network :private_network, ip: machine[:ip]
+            node.vm.network "forwarded_port", guest: 22, host: machine[:ssh_port], id: "ssh"
+
+            node.vm.provider :virtualbox do |vb|
+              vb.customize ["modifyvm", :id, "--memory", 2048]
+            end
+    end
+  end
+
+
+  #  config.vm.provider :virtualbox do |vb|
+  #    vb.customize ["modifyvm", :id "--memory", 2048]
+  #  end
+  # config.vm.box = "centos/7"
+  # #config.vm.network "forwarded_port", guest: 80, host: 8888
+  # #config.vm.provision "file", source: "nginx/index.html", destination: "/tmp/index.html"
+  # config.vm.provision "shell", inline: <<-SHELL  
+  #    echo "Hello world"
+  # #   mv /tmp/index.html /var/www/html/
+  # #   systemctl start httpd
+  # #   systemctl enable httpd
+  #  SHELL
+end
